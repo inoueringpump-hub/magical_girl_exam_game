@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>魔法少女検定 - 契約者級</title>
+  <style>
+    :root{
+      --bg1:#17051f;
+      --bg2:#331047;
+      --pink:#ff6bd6;
+      --blue:#69e2ff;
+      --gold:#ffe27a;
+      --danger:#ff4f7b;
+      --ok:#72ffb4;
+      --panel:rgba(255,255,255,.09);
+      --panel2:rgba(255,255,255,.14);
+      --text:#fff8ff;
+      --muted:#d8bddf;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Yu Gothic", "Meiryo", system-ui, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,107,214,.35), transparent 28%),
+        radial-gradient(circle at 80% 20%, rgba(105,226,255,.25), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(255,226,122,.18), transparent 35%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+    .stars{position:fixed;inset:0;pointer-events:none;opacity:.45;background-image:radial-gradient(#fff 1px, transparent 1px);background-size:34px 34px;animation: drift 30s linear infinite}
+    @keyframes drift{to{transform:translateY(34px)}}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 48px;position:relative;z-index:1}
+    header{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-bottom:18px}
+    h1{font-size:clamp(28px,5vw,54px);margin:0;letter-spacing:.05em;text-shadow:0 0 18px rgba(255,107,214,.8)}
+    .subtitle{color:var(--muted);margin:.4rem 0 0;line-height:1.6}
+    .mascot{
+      width:126px;height:126px;border-radius:40% 40% 48% 48%;
+      background:linear-gradient(160deg,#fff,#ffd8f4 55%,#a8f0ff);
+      box-shadow:0 0 28px rgba(255,107,214,.5), inset -12px -10px 22px rgba(255,107,214,.24);
+      position:relative;display:grid;place-items:center;color:#6b246f;font-weight:900;
+    }
+    .mascot:before,.mascot:after{content:"";position:absolute;top:-20px;width:44px;height:58px;background:#fff;border-radius:50% 50% 45% 45%;box-shadow:inset -8px -10px 12px rgba(255,107,214,.18)}
+    .mascot:before{left:12px;transform:rotate(-25deg)} .mascot:after{right:12px;transform:rotate(25deg)}
+    .face{font-size:34px;z-index:1}.badge{display:inline-block;padding:6px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.08);font-size:13px;color:#fff}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.18);border-radius:26px;box-shadow:0 20px 70px rgba(0,0,0,.3);backdrop-filter:blur(12px);padding:20px}
+    .topbar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+    .stat{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px;text-align:center}
+    .stat b{display:block;font-size:22px;color:var(--gold)}.stat span{font-size:12px;color:var(--muted)}
+    .meter{height:14px;background:rgba(0,0,0,.25);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.15);margin:12px 0 16px}
+    .meter>div{height:100%;width:100%;background:linear-gradient(90deg,var(--blue),var(--pink),var(--gold));transition:.3s}
+    .question-card{padding:22px;border-radius:24px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12)}
+    .category{color:var(--blue);font-weight:700;font-size:14px;margin-bottom:8px}.question{font-size:clamp(20px,3vw,30px);font-weight:800;line-height:1.45;margin-bottom:18px}
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.choice{appearance:none;border:none;color:var(--text);background:var(--panel2);border:1px solid rgba(255,255,255,.17);border-radius:18px;padding:14px 14px;text-align:left;font-weight:700;line-height:1.45;cursor:pointer;transition:.18s;min-height:70px}
+    .choice:hover{transform:translateY(-2px);box-shadow:0 0 0 2px rgba(255,107,214,.24), 0 12px 28px rgba(0,0,0,.22)}
+    .choice.correct{background:rgba(114,255,180,.18);border-color:var(--ok)}.choice.wrong{background:rgba(255,79,123,.18);border-color:var(--danger)}.choice:disabled{cursor:not-allowed;opacity:.9}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.btn{border:none;border-radius:999px;padding:12px 20px;font-weight:900;cursor:pointer;color:#32103e;background:linear-gradient(90deg,var(--gold),#fff0a3);box-shadow:0 10px 24px rgba(0,0,0,.25)}.btn.secondary{color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+    .result{margin-top:16px;padding:16px;border-radius:18px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.13);line-height:1.75;display:none}.result.show{display:block}.result strong{color:var(--gold)}
+    .final{display:none;text-align:center;padding:28px}.final.show{display:block}.rank{font-size:clamp(30px,6vw,64px);font-weight:1000;color:var(--gold);text-shadow:0 0 18px rgba(255,226,122,.6);margin:8px 0}.small{color:var(--muted);font-size:14px;line-height:1.7}.log{margin-top:18px;display:grid;gap:8px;text-align:left}.log div{padding:10px;border-radius:14px;background:rgba(255,255,255,.07);font-size:13px;color:#ead8ef}
+    .spark{position:absolute;pointer-events:none;font-size:22px;animation:pop .75s ease-out forwards}@keyframes pop{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-60px) scale(1.8)}}
+    @media(max-width:760px){header{grid-template-columns:1fr}.mascot{width:92px;height:92px}.topbar{grid-template-columns:1fr 1fr}.choices{grid-template-columns:1fr}.question-card{padding:16px}.wrap{padding-top:18px}}
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <main class="wrap">
+    <header>
+      <div>
+        <span class="badge">超難問 / 契約者級 / 6択ランダム</span>
+        <h1>魔法少女検定</h1>
+        <p class="subtitle">変身バンク、魔力保存則、敵組織の会計処理、マスコット契約倫理まで問われる謎の高難度試験。</p>
+      </div>
+      <div class="mascot" title="契約監査マスコット"><div class="face">◕‿◕<br><span style="font-size:13px">契約?</span></div></div>
+    </header>
+
+    <section class="panel" id="game">
+      <div class="topbar">
+        <div class="stat"><b id="qno">1</b><span>問題</span></div>
+        <div class="stat"><b id="score">0</b><span>スコア</span></div>
+        <div class="stat"><b id="chain">0</b><span>連続正解</span></div>
+        <div class="stat"><b id="mana">100</b><span>魔力残量</span></div>
+      </div>
+      <div class="meter"><div id="manaBar"></div></div>
+      <div class="question-card">
+        <div class="category" id="category"></div>
+        <div class="question" id="question"></div>
+        <div class="choices" id="choices"></div>
+      </div>
+      <div class="result" id="result"></div>
+      <div class="controls">
+        <button class="btn" id="nextBtn" style="display:none">次の契約条項へ</button>
+        <button class="btn secondary" id="restartBtn">最初からやり直す</button>
+      </div>
+    </section>
+
+    <section class="panel final" id="final">
+      <div class="badge">試験終了</div>
+      <div class="rank" id="rank"></div>
+      <p id="finalText"></p>
+      <div class="controls" style="justify-content:center"><button class="btn" onclick="restart()">再受験する</button></div>
+      <div class="log" id="log"></div>
+    </section>
+  </main>
+
+<script>
+const QUESTIONS = [
+  {
+    cat:"変身バンク工学",
+    q:"変身バンクの演出時間が作中時間では短縮される、というお約束をもっとも疑似科学っぽく説明するなら？",
+    choices:["観測者側の尺だけが伸長する演出相対性フレーム", "魔力粒子のブラウン運動が衣装繊維を圧縮する現象", "敵の攻撃判定が著作権上停止するプロトコル", "主人公の羞恥心が時空を歪ませる心理物理モデル", "マスコットの営業成績に応じた時間外労働", "リボンの慣性モーメントがゼロになるから"],
+    a:0,
+    exp:"作中世界の物理というより、視聴者側の演出尺だけが長く見えると考えるのが一番それっぽい説明です。"
+  },
+  {
+    cat:"契約倫理学",
+    q:"『願いを叶える代わりに戦闘義務を負わせる』契約で、もっとも監査上ツッコミどころが大きい条項は？",
+    choices:["重要事項説明の不足", "制服デザインの過剰なフリル", "必殺技名の商標登録", "ステッキの減価償却", "変身時BGMの包括許諾", "敵幹部の福利厚生"],
+    a:0,
+    exp:"契約リスク、代償、解除条件、危険性が十分説明されていないなら、普通にかなり危ない契約です。"
+  },
+  {
+    cat:"魔力熱力学",
+    q:"魔法少女が毎週巨大な浄化ビームを撃てる場合、エネルギー収支をごまかす設定として一番便利なのは？",
+    choices:["感情エネルギーを高次元ストレージから引き出す", "スカートの回転で永久機関を作る", "月光を100%質量変換する", "ステッキ内部に原子炉を入れる", "友情を直接ATPに変換する", "敵のセリフを燃料にする"],
+    a:0,
+    exp:"通常物理では説明しにくいので、高次元・異空間・感情エネルギーなどの外部リソース設定が定番です。"
+  },
+  {
+    cat:"敵組織経営論",
+    q:"毎回同じ街に怪人を派遣し続ける敵組織の経営判断として、最も現実的にヤバいものは？",
+    choices:["失敗データを次回作戦へ反映していない", "怪人名の語感が毎回やや雑", "爆発背景の発注先が固定", "幹部会議の照明が暗すぎる", "撤退時の煙幕費が高い", "雑魚戦闘員の掛け声が単調"],
+    a:0,
+    exp:"負けパターンを繰り返す組織はPDCAが壊滅的です。戦略以前に改善体制がありません。"
+  },
+  {
+    cat:"アイテム分類学",
+    q:"魔法のコンパクト、ステッキ、ブローチ等を工学的にまとめて呼ぶなら、最もしっくりくる分類は？",
+    choices:["認証・変換・増幅を兼ねる携帯型魔力インターフェース", "装飾過多な棒状打撃武器", "少女向け高輝度懐中電灯", "精神論で動くIoT端末", "契約書の物理的な表紙", "敵に見せるための身分証明書"],
+    a:0,
+    exp:"本人認証、変身トリガー、魔力増幅、必殺技制御を兼ねる端末と考えると納得しやすいです。"
+  },
+  {
+    cat:"正体秘匿プロトコル",
+    q:"魔法少女の正体が周囲にバレにくい理由として、最も“作品内ルール”として便利なのは？",
+    choices:["認知阻害フィールドが顔貌認識を曖昧化する", "周囲の視力が毎回偶然落ちる", "髪型が変わると戸籍も変わる", "制服が派手すぎて逆に記憶に残らない", "友人全員が空気を読む", "敵だけが名札を見落とす"],
+    a:0,
+    exp:"髪型や服だけでバレない問題はよく突っ込まれるので、認知阻害設定があると強いです。"
+  },
+  {
+    cat:"必殺技言語学",
+    q:"必殺技名に『スター』『プリズム』『ハート』『レボリューション』等が頻出する最大の効果は？",
+    choices:["意味より音象徴で高揚感と属性を即時伝達できる", "敵の聴覚を物理的に破壊する", "発音数で魔力税が変わる", "視聴者の語彙力を試験する", "作画スタッフに休憩時間を与える", "宇宙法上の攻撃宣言になる"],
+    a:0,
+    exp:"音のキラキラ感、属性、勢いを一瞬で伝える効果が大きいです。意味の厳密性より印象が重要です。"
+  },
+  {
+    cat:"マスコット生態学",
+    q:"魔法少女もののマスコットが一番よく担う役割は？",
+    choices:["世界観説明・契約媒介・販促アイテム化の三重機能", "単なる野良猫の上位互換", "最終回まで何もしない置物", "主人公の弁当監査員", "敵組織の経理担当", "変身バンクの照明係"],
+    a:0,
+    exp:"マスコットは物語上の案内役であり、契約の窓口であり、グッズ展開の中心にもなりやすい存在です。"
+  },
+  {
+    cat:"衣装構造解析",
+    q:"戦闘服なのにフリルやリボンが多い理由を、メタ的に最も正しく言うなら？",
+    choices:["シルエット識別性と玩具・衣装展開の記号性が高いから", "防弾性能が最強だから", "空気抵抗を増やして敵を油断させるから", "布面積が増えるほど魔法陣が安定するから", "洗濯表示が敵の弱点だから", "リボンが量子通信アンテナだから"],
+    a:0,
+    exp:"デザインとして記憶に残りやすく、キャラ識別や商品展開にも向いているのが大きな理由です。"
+  },
+  {
+    cat:"闇堕ち心理学",
+    q:"魔法少女ジャンルで『闇堕ち』が強い展開になりやすい理由は？",
+    choices:["理想化された善性と内的葛藤の落差が大きいから", "黒い衣装のほうが洗濯しやすいから", "敵のほうが交通費を出してくれるから", "ステッキの電池残量が減るから", "変身BGMが短調になると法的に闇堕ちだから", "マスコットが有給を取るから"],
+    a:0,
+    exp:"『人を救う存在』が傷つき、迷い、反転することでドラマの落差が大きくなります。"
+  },
+  {
+    cat:"結界空間設計",
+    q:"戦闘中だけ街が異空間化する設定の便利な点は？",
+    choices:["一般人被害と都市破壊の処理を物語上コントロールできる", "背景美術を毎回完全に同じにできる", "敵の固定資産税を下げられる", "魔法少女の通学路を短縮できる", "怪人の迷子防止になる", "変身アイテムのWi-Fiが強くなる"],
+    a:0,
+    exp:"結界・異空間は被害範囲、目撃者、破壊描写を整理できる非常に便利な設定です。"
+  },
+  {
+    cat:"シリーズ構成論",
+    q:"1話完結型の魔法少女で、毎回新しい怪人が出る構造の最大メリットは？",
+    choices:["日常問題とバトルを同じ話内で解決しやすい", "主人公が毎回転校できる", "敵組織の予算が無限に見える", "変身バンクを禁止できる", "マスコットの出番を完全削除できる", "視聴者が絶対に混乱しない"],
+    a:0,
+    exp:"日常の悩み、敵の作戦、バトル、解決を一話にまとめやすい構造です。"
+  }
+];
+
+let order=[], idx=0, score=0, chain=0, mana=100, answered=false, history=[];
+const $=id=>document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5)}
+function init(){order=shuffle([...Array(QUESTIONS.length).keys()]);idx=0;score=0;chain=0;mana=100;answered=false;history=[];$('game').style.display='block';$('final').classList.remove('show');showQuestion()}
+function showQuestion(){answered=false;const data=QUESTIONS[order[idx]];$('qno').textContent=`${idx+1}/${order.length}`;$('score').textContent=score;$('chain').textContent=chain;$('mana').textContent=mana;$('manaBar').style.width=mana+'%';$('category').textContent='◆ '+data.cat;$('question').textContent=data.q;$('result').classList.remove('show');$('nextBtn').style.display='none';const choiceBox=$('choices');choiceBox.innerHTML='';
+  const mixed=shuffle(data.choices.map((text,i)=>({text,i})));
+  mixed.forEach((c,n)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span style="color:#ffe27a">${['A','B','C','D','E','F'][n]}.</span> ${c.text}`;b.onclick=e=>answer(c.i,b,e);choiceBox.appendChild(b)});
+}
+function answer(choiceIndex,btn,e){if(answered)return;answered=true;const data=QUESTIONS[order[idx]];const correct=choiceIndex===data.a;document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.choice').forEach(b=>{if(b.textContent.includes(data.choices[data.a])) b.classList.add('correct')});
+  if(!correct) btn.classList.add('wrong');
+  if(correct){chain++;const add=100+chain*25;score+=add;mana=Math.min(100,mana+8);spark(e.clientX,e.clientY,'✦');$('result').innerHTML=`<strong>正解！</strong> +${add}点<br>${data.exp}`;}
+  else{chain=0;mana=Math.max(0,mana-18);$('result').innerHTML=`<strong>不正解……契約書の細字を見落としました。</strong><br>正解：${data.choices[data.a]}<br>${data.exp}`;}
+  history.push(`${correct?'○':'×'} ${data.cat}：${data.q.slice(0,34)}...`);
+  $('score').textContent=score;$('chain').textContent=chain;$('mana').textContent=mana;$('manaBar').style.width=mana+'%';$('result').classList.add('show');$('nextBtn').style.display='inline-block';
+}
+function next(){idx++; if(idx>=order.length||mana<=0) finish(); else showQuestion()}
+function finish(){ $('game').style.display='none'; $('final').classList.add('show'); let rank,text; const rate=score/(QUESTIONS.length*100);
+  if(mana<=0){rank='魔力枯渇級'; text='途中で魔力が尽きました。契約前にエネルギー収支表を読むタイプの魔法少女が必要です。'}
+  else if(rate>=2.0){rank='円環監査官級'; text='ほぼ伝説です。敵組織の稟議書まで読めるタイプの魔法少女です。'}
+  else if(rate>=1.45){rank='上級契約者級'; text='かなり強いです。変身バンク中に経費処理まで考えられます。'}
+  else if(rate>=1.0){rank='正規魔法少女級'; text='十分合格です。マスコットの怪しい説明にも一応ツッコミを入れられます。'}
+  else{rank='見習いステッキ係'; text='まだ伸びしろがあります。まずは契約書と必殺技名の発音練習からです。'}
+  $('rank').textContent=rank; $('finalText').innerHTML=`スコア：<strong>${score}</strong>点 / 魔力残量：<strong>${mana}</strong><br>${text}`;
+  $('log').innerHTML=history.map(x=>`<div>${x}</div>`).join('');
+}
+function restart(){init()}
+function spark(x,y,char){const s=document.createElement('div');s.className='spark';s.textContent=char;s.style.left=x+'px';s.style.top=y+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),800)}
+$('nextBtn').onclick=next;$('restartBtn').onclick=restart;init();
+</script>
+</body>
+</html>
